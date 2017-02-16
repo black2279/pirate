@@ -87,8 +87,10 @@ Public Class FreeMusic
         ' Create list for the results
         Dim songs As New List(Of Song)
 
-        Dim rx As New Regex(".+?<!json>(.+)<!><!null>.*")
+        Dim rx As New Regex("(?<=<!json>)(.*)(?=<!><!null>)")
         Dim m As Match = rx.Match(response)
+
+        'System.Console.WriteLine(m.ToString)
 
         If m.Success Then
             Dim json = m.Groups(1).ToString()
@@ -111,7 +113,10 @@ Public Class FreeMusic
         Dim data As String = "act=reload_audio&al=1&ids=" & String.Join(",", songIds)
         Dim result As String = PostRequest("https://vk.com/al_audio.php", data)
 
-        Dim rx As New Regex(".+?<!json>(.+)<!><!json>.*")
+        Dim rx As New Regex("(?<=<!json>)(.*)(<!><!bool>)")
+
+        'System.Console.WriteLine(result)
+
         Dim m As Match = rx.Match(result)
         If m.Success Then
             Dim str = JsonConvert.DeserializeObject(Of List(Of List(Of String)))(m.Groups(1).ToString())
