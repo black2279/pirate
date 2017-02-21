@@ -219,6 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\AutoUpdate.exe" />
+    <EmbeddedResource Include="vk.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\Fody.1.28.3\build\Fody.targets" Condition="Exists('..\packages\Fody.1.28.3\build\Fody.targets')" />
