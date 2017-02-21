@@ -4,9 +4,11 @@ Imports System.Net
 Imports System.Text.RegularExpressions
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
+Imports Jurassic
 
 Public Class FreeMusic
     Private _session As Session
+    Private _engine As Jurassic.ScriptEngine
 
 #Region "Public functions"
 
@@ -39,6 +41,9 @@ Public Class FreeMusic
             ' Save username/password settings
             My.Settings.AuthUser = username
             My.Settings.AuthPass = password
+            'Initialize script engine
+            _engine = New Jurassic.ScriptEngine()
+            LoadScript()
         End If
     End Sub
 
@@ -90,8 +95,6 @@ Public Class FreeMusic
         Dim rx As New Regex("(?<=<!json>)(.*)(?=<!><!null>)")
         Dim m As Match = rx.Match(response)
 
-        'System.Console.WriteLine(m.ToString)
-
         If m.Success Then
             Dim json = m.Groups(1).ToString()
             Dim o As JObject = JObject.Parse(json)
@@ -115,8 +118,6 @@ Public Class FreeMusic
 
         Dim rx As New Regex("(?<=<!json>)(.*)(<!><!bool>)")
 
-        'System.Console.WriteLine(result)
-
         Dim m As Match = rx.Match(result)
         If m.Success Then
             Dim str = JsonConvert.DeserializeObject(Of List(Of List(Of String)))(m.Groups(1).ToString())
@@ -126,7 +127,7 @@ Public Class FreeMusic
                              .Artist = WebUtility.HtmlDecode(item.ElementAt(4)),
                              .Title = WebUtility.HtmlDecode(item.ElementAt(3)),
                              .Duration = item.ElementAt(5),
-                             .Url = item.ElementAt(2)
+                             .Url = _engine.Evaluate("e( '" + item.ElementAt(2) + "' )")
                              })
             Next
         End If
@@ -177,6 +178,11 @@ Public Class FreeMusic
         Next
         Return bitrate
     End Function
+
+    Private Sub LoadScript()
+        Dim script As ScriptSource = New FileScriptSource("vk.js")
+        _engine.Evaluate(script)
+    End Sub
 
 #End Region
 
