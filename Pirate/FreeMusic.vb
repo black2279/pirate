@@ -180,8 +180,7 @@ Public Class FreeMusic
     End Function
 
     Private Sub LoadScript()
-        Dim script As ScriptSource = New FileScriptSource("vk.js")
-        _engine.Evaluate(script)
+        _engine.Evaluate(My.Resources.vk)
     End Sub
 
 #End Region
