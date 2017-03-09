@@ -232,7 +232,7 @@ Public Class FrmMain
 
                 readings += 1
                 If readings >= 10 Then
-                    speed = 81920 / (speedTimer.ElapsedMilliseconds / 1000)
+                    speed = 8192 / (speedTimer.ElapsedMilliseconds / 1000)
                     speedTimer.Reset()
                     readings = 0
                 End If
