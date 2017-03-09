@@ -18,27 +18,25 @@ Public Class Session
 
         Public Sub New()
             ' Make request
-            Dim request As HttpWebRequest = WebRequest.Create("https://vk.com")
+            Dim request As HttpWebRequest = CType(WebRequest.Create("https://vk.com"), HttpWebRequest)
             request.Method = "GET"
-            request.CookieContainer = New CookieContainer()
-            request.CookieContainer.Add(New Uri("https://vk.com"), New CookieCollection())
 
-            Using response As HttpWebResponse = request.GetResponse()
-                Using responseStream = New StreamReader(response.GetResponseStream(), System.Text.Encoding.GetEncoding("windows-1251"))
-                    Dim result As String = responseStream.ReadToEnd()
+            Dim response As HttpWebResponse = CType(request.GetResponse(), HttpWebResponse)
+            Dim cookie As String = ((response.Headers("Set-Cookie").Split(New String() {"remixlhk="}, StringSplitOptions.None)(1)).Split(";"))(0)
 
-                    ' Fetch login parameters
+            If cookie <> "" Then
+                remixlhk = cookie
+            End If
 
-                    Dim cookie = response.Cookies.OfType(Of Cookie)().Where(Function(x) x.Name = "remixlhk").FirstOrDefault()
+            Dim responseStream = New StreamReader(response.GetResponseStream(), System.Text.Encoding.GetEncoding("windows-1251"))
+            Dim result As String = responseStream.ReadToEnd()
 
-                    If cookie IsNot Nothing Then
-                        remixlhk = cookie.Value
-                    End If
+            ' Fetch login parameters
 
-                    ip_h = FetchParam("ip_h", result)
-                    lg_h = FetchParam("lg_h", result)
-                End Using
-            End Using
+            ip_h = FetchParam("ip_h", result)
+            lg_h = FetchParam("lg_h", result)
+            responseStream.Close()
+            response.Close()
 
             If Not IsValid Then
                 Throw New ApplicationException("There was a problem fetching required login parameters")
@@ -46,7 +44,7 @@ Public Class Session
 
         End Sub
 
-        Private Shared Function FetchParam(paramName As String, data As String) As String
+        Private Shared Function FetchParam(ByVal paramName As String, ByVal data As String) As String
             Dim htmlElementStart As Integer = data.IndexOf("<form method=""post"" action=""https://login.vk.com")
             If htmlElementStart <> -1 Then
                 Dim html As String = data.Substring(htmlElementStart, data.IndexOf(">"c, htmlElementStart) - htmlElementStart)
@@ -78,7 +76,7 @@ Public Class Session
         Reset()
     End Sub
 
-    Public Sub New(username As String, password As String)
+    Public Sub New(ByVal username As String, ByVal password As String)
         Me.New()
         Me.Username = username
         Me.Password = password
@@ -89,6 +87,8 @@ Public Class Session
         Username = ""
         Password = ""
         Guid = ""
+        My.Settings.AuthUser = ""
+        My.Settings.AuthPass = ""
     End Sub
 
     Public Function TryLogin() As Boolean
@@ -120,10 +120,10 @@ Public Class Session
 
             ' Get response and login cookie
             Using response As HttpWebResponse = request.GetResponse()
-                Dim cookie = response.Cookies.OfType(Of Cookie)().Where(Function(x) x.Name = "remixsid").FirstOrDefault()
+                Dim cookie As String = (((response.Headers("Set-Cookie")).Split(New String() {"remixsid="}, StringSplitOptions.None)(1)).Split(";"))(0)
 
-                If cookie IsNot Nothing Then
-                    Guid = cookie.Value
+                If cookie <> "" Then
+                    Guid = cookie
                 End If
             End Using
         End Using
