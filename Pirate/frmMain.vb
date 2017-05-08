@@ -20,6 +20,7 @@ Public Class FrmMain
     Private _didCancel As Boolean
     Private _searchString As String = ""
     Private _searchIdMax As Integer = 0
+    Private _offset As Integer = 1
     Private _songsToFetch As Integer = 0
 
 #End Region
@@ -34,6 +35,7 @@ Public Class FrmMain
             Me.Songs.Clear()
             tmSearch.Rows.Clear()
             _searchIdMax = 0
+            _offset = 1
         End If
         pbProgress.Value = 0
         btnSearch.Text = "Searching.."
@@ -49,7 +51,7 @@ Public Class FrmMain
                 Manager.Music.Login(My.Settings.AuthUser, My.Settings.AuthPass)
             End If
 
-            Dim result As List(Of FreeMusic.Song) = Manager.Music.Search(txtSearch.Text, _searchIdMax)
+            Dim result As List(Of FreeMusic.Song) = Manager.Music.Search(txtSearch.Text, _offset)
             Songs.AddRange(result)
             Invoke(New UpdateSearchDelegate(AddressOf SearchCompleted), result)
         Catch ex As Exception
@@ -74,6 +76,7 @@ Public Class FrmMain
             tmSearch.Rows.Add(r)
             _searchIdMax += 1
         Next
+        _offset += 50
         tblSearch.ScrollToTop()
         FetchDetails(result)
     End Sub
