@@ -1,6 +1,7 @@
 Imports System
 Imports System.IO
 Imports System.Net
+Imports HtmlAgilityPack
 Imports System.Text.RegularExpressions
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
@@ -47,11 +48,10 @@ Public Class FreeMusic
         End If
     End Sub
 
-    Public Function Search(ByVal query As String, Optional ByVal offset As Integer = 0) As List(Of Song)
-        Dim data As String = "act=a_load_section&al=1&claim=0&offset=" & offset &
-                             "&search_history=0&search_lyrics=0&search_performer=0&search_q=" &
-                             System.Web.HttpUtility.UrlEncode(query) & "&search_sort=0&type=search"
-        Dim result As String = PostRequest("https://vk.com/al_audio.php", data)
+    Public Function Search(ByVal query As String, Optional ByVal offset As Integer = 1) As List(Of Song)
+        Dim data As String = "act=search&offset=" & offset &
+                             "&q=" & System.Web.HttpUtility.UrlEncode(query)
+        Dim result As String = PostRequest("https://m.vk.com/audio", data)
 
         ' Parse songs
         Dim songs As List(Of Song) = ParseSongs(result)
@@ -91,45 +91,37 @@ Public Class FreeMusic
     Private Function ParseSongs(ByVal response As String) As List(Of Song)
         ' Create list for the results
         Dim songs As New List(Of Song)
-
-        Dim rx As New Regex("(?<=<!json>)(.*)(?=<!><!null>)")
+        'Remove first comment from response
+        Dim rx As New Regex("(>)(.*)", RegexOptions.Singleline)
         Dim m As Match = rx.Match(response)
 
         If m.Success Then
-            Dim json = m.Groups(1).ToString()
-            Dim o As JObject = JObject.Parse(json)
-            Dim songIds = From p In o("list").Children().Select(Function(x) String.Join("_", x.Take(2).Reverse()))
 
-            ' Need to request by batch of 10...
-            While (songIds.Any())
-                songs.AddRange(GetSong(songIds.Take(10)))
-                songIds = songIds.Skip(10)
-            End While
-        End If
+            Dim str As New StringReader(m.Groups(2).ToString())
+            Dim doc As HtmlDocument = New HtmlDocument()
+            doc.Load(str)
 
-        Return songs
-    End Function
+            'Get songs Html Nodes by XPath Expression
+            Dim songs_nodes = doc.DocumentNode.SelectNodes("//div[@class='audio_item ai_has_btn']")
 
-    Private Function GetSong(ByVal songIds As IEnumerable(Of String)) As IEnumerable(Of Song)
-        Dim songs As New List(Of Song)
+            If Not IsNothing(songs_nodes) Then
 
-        Dim data As String = "act=reload_audio&al=1&ids=" & String.Join(",", songIds)
-        Dim result As String = PostRequest("https://vk.com/al_audio.php", data)
+                For Each s As HtmlNode In songs_nodes
+                    'Retrive song info by XPath Expressions
+                    Dim artist As String = s.SelectSingleNode(".//span[@class='ai_artist']").InnerText
+                    Dim title As String = s.SelectSingleNode(".//span[@class='ai_title']").InnerText
+                    Dim duration As Integer = s.SelectSingleNode(".//div[@class='ai_dur']").GetAttributeValue("data-dur", -1)
+                    Dim url As String = s.SelectSingleNode(".//input[@type='hidden']").GetAttributeValue("value", "no-url")
 
-        Dim rx As New Regex("(?<=<!json>)(.*)(<!><!bool>)")
+                    songs.Add(New Song() With {
+                            .Artist = WebUtility.HtmlDecode(artist),
+                            .Title = WebUtility.HtmlDecode(title),
+                            .Duration = duration,
+                            .Url = url
+                    })
 
-        Dim m As Match = rx.Match(result)
-        If m.Success Then
-            Dim str = JsonConvert.DeserializeObject(Of List(Of List(Of String)))(m.Groups(1).ToString())
-
-            For Each item In str
-                songs.Add(New Song() With {
-                             .Artist = WebUtility.HtmlDecode(item.ElementAt(4)),
-                             .Title = WebUtility.HtmlDecode(item.ElementAt(3)),
-                             .Duration = item.ElementAt(5),
-                             .Url = _engine.Evaluate("e( '" + item.ElementAt(2) + "' )")
-                             })
-            Next
+                Next
+            End If
         End If
 
         Return songs
@@ -157,7 +149,7 @@ Public Class FreeMusic
         Using response As HttpWebResponse = request.GetResponse
             Using _
                 responseStream =
-                    New StreamReader(response.GetResponseStream, System.Text.Encoding.GetEncoding("iso-8859-5"))
+                    New StreamReader(response.GetResponseStream, System.Text.Encoding.GetEncoding("utf-8"))
                 result = responseStream.ReadToEnd
             End Using
         End Using
