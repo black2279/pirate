@@ -3,9 +3,11 @@ Imports System.IO
 Imports System.Net
 Imports HtmlAgilityPack
 Imports System.Text.RegularExpressions
+Imports Jurassic
 
 Public Class FreeMusic
     Private _session As Session
+    Private _engine As Jurassic.ScriptEngine
 
 #Region "Public functions"
 
@@ -38,6 +40,9 @@ Public Class FreeMusic
             ' Save username/password settings
             My.Settings.AuthUser = username
             My.Settings.AuthPass = password
+            'Initialize script engine
+            _engine = New Jurassic.ScriptEngine()
+            LoadScript()
         End If
     End Sub
 
@@ -110,7 +115,7 @@ Public Class FreeMusic
                             .Artist = WebUtility.HtmlDecode(artist),
                             .Title = WebUtility.HtmlDecode(title),
                             .Duration = duration,
-                            .Url = url
+                            .Url = _engine.Evaluate("e( '" + url + "' )")
                     })
 
                 Next
@@ -163,6 +168,10 @@ Public Class FreeMusic
         Next
         Return bitrate
     End Function
+
+    Private Sub LoadScript()
+        _engine.Evaluate(My.Resources.vk)
+    End Sub
 
 #End Region
 
