@@ -89,5 +89,26 @@ Namespace My.Resources
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
+        
+        '''<summary>
+        '''  Cerca una stringa localizzata simile a 
+        '''/******************************************************/
+        '''/* These functions came from audioplayer.js on vk.com */
+        '''/******************************************************/
+        '''
+        '''var a = &quot;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/=&quot;
+        '''
+        '''function isObject(obj) { return Object.prototype.toString.call(obj) === &apos;[object Object]&apos;; }
+        '''	
+        '''function each(object, callback) {
+        '''	if (!isObject(object) &amp;&amp; typeof object.length !== &apos;undefined&apos;) {
+        '''		for (var i = 0, length = object.length; i &lt; length; i++) {
+        '''		  va [stringa troncata]&quot;;.
+        '''</summary>
+        Friend ReadOnly Property vk() As String
+            Get
+                Return ResourceManager.GetString("vk", resourceCulture)
+            End Get
+        End Property
     End Module
 End Namespace
