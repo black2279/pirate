@@ -22,6 +22,17 @@ function each(object, callback) {
 	}
 	return object;
 }
+
+function f(t, i) {
+        var e = t.length
+          , o = [];
+        if (e) {
+            var a = e;
+            for (i = Math.abs(i); a--; )
+                o[a] = (i += i * (a + e) / i) % e | 0
+        }
+        return o
+    }
 		 
 var s = {
 	v: function(t) {
@@ -34,6 +45,17 @@ var s = {
 			~e && (t[s] = o.substr(e - i, 1));
 		return t.join("")
 	},
+	s: function(t, i) {
+            var e = t.length;
+            if (e) {
+                var o = f(t, i)
+                  , a = 0;
+                for (t = t.split(""); ++a < e; )
+                    t[a] = t.splice(o[e - 1 - a], 1, t[a])[0];
+                t = t.join("")
+            }
+            return t
+    },
 	x: function(t, i) {
 		var e = [];
 		return i = i.charCodeAt(0),
@@ -47,11 +69,11 @@ var s = {
 function e(t) {
 	if (~t.indexOf("audio_api_unavailable")) {
 		var i = t.split("?extra=")[1].split("#")
-		  , e = o(i[1]);
-		if (i = o(i[0]),
-		!e || !i)
+		  , e = "" === i[1] ? "" : o(i[1]);
+		if (i = o(i[0]), 
+		"string" != typeof e || !i)
 			return t;
-		e = e.split(String.fromCharCode(9));
+		e = e ? e.split(String.fromCharCode(9)) : [];
 		for (var a, r, l = e.length; l--; ) {
 			if (r = e[l].split(String.fromCharCode(11)),
                     a = r.splice(0, 1, i.toString() /*explicit conversion*/)[0],
