@@ -3,10 +3,11 @@
 /* These functions came from audioplayer.js on vk.com */
 /******************************************************/
 
-var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
+var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/=";
 
 function isObject(obj) { return Object.prototype.toString.call(obj) === '[object Object]'; }
-	
+
+/*	
 function each(object, callback) {
 	if (!isObject(object) && typeof object.length !== 'undefined') {
 		for (var i = 0, length = object.length; i < length; i++) {
@@ -21,6 +22,19 @@ function each(object, callback) {
 		}
 	}
 	return object;
+}*/
+
+function each(e, t) {
+        if (!e)
+            return e;
+        if (isObject(e) || "undefined" == typeof e.length) {
+            for (var n in e)
+                if (e.hasOwnProperty(n) && t.call(e[n], n, e[n]) === !1)
+                    break
+        } else
+            for (var i = 0, a = e.length; a > i && t.call(e[i], i, e[i]) !== !1; i++)
+                ;
+     return e
 }
 
 function f(t, i) {
@@ -29,7 +43,8 @@ function f(t, i) {
         if (e) {
             var a = e;
             for (i = Math.abs(i); a--; )
-                o[a] = (i += i * (a + e) / i) % e | 0
+                i = (e * (a + 1) ^ i + a) % e,
+				o[a] = i
         }
         return o
     }
@@ -55,6 +70,9 @@ var s = {
                 t = t.join("")
             }
             return t
+    },
+	i: function(e, t) {
+	    return s.s(e, t ^ vkid)
     },
 	x: function(t, i) {
 		var e = [];
