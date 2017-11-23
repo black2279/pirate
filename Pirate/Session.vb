@@ -3,6 +3,7 @@ Imports System.Linq
 Imports System.Net
 Imports System.Text
 Imports System.Web
+Imports System.Text.RegularExpressions
 
 Public Class Session
     Private Class LoginParams
@@ -89,6 +90,7 @@ Public Class Session
         Guid = ""
         My.Settings.AuthUser = ""
         My.Settings.AuthPass = ""
+        My.Settings.UserId = ""
     End Sub
 
     Public Function TryLogin() As Boolean
@@ -121,6 +123,17 @@ Public Class Session
             ' Get response and login cookie
             Using response As HttpWebResponse = request.GetResponse()
                 Dim cookie As String = (((response.Headers("Set-Cookie")).Split(New String() {"remixsid="}, StringSplitOptions.None)(1)).Split(";"))(0)
+
+                If My.Settings.UserId = "" Then
+                    Using reader As StreamReader = New System.IO.StreamReader(response.GetResponseStream())
+                        Dim responseText As String = reader.ReadToEnd()
+                        Dim rx As New Regex("""uid"":""(.*?)"",", RegexOptions.Singleline)
+                        Dim m As Match = rx.Match(responseText)
+                        If m.Success Then
+                            My.Settings.UserId = m.Groups(1).ToString()
+                        End If
+                    End Using
+                End If
 
                 If cookie <> "" Then
                     Guid = cookie
