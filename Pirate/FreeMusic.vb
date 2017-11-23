@@ -115,7 +115,7 @@ Public Class FreeMusic
                             .Artist = WebUtility.HtmlDecode(artist),
                             .Title = WebUtility.HtmlDecode(title),
                             .Duration = duration,
-                            .Url = _engine.Evaluate("e( '" + url + "' )")
+                            .Url = _engine.Evaluate("var vkid=" + My.Settings.UserId + "; e( '" + url + "' )")
                     })
 
                 Next
