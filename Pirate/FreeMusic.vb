@@ -87,20 +87,22 @@ Public Class FreeMusic
 #Region "Private functions"
 
     Private Function ParseSongs(ByVal response As String) As List(Of Song)
+
         ' Create list for the results
         Dim songs As New List(Of Song)
-        'Remove first comment from response
-        Dim rx As New Regex("(>)(.*)", RegexOptions.Singleline)
+        ' Get only html tag content
+        Dim rx As New Regex("(<\s*html[^>]*>)(.*?)(<\s*/\s*html>)", RegexOptions.Singleline)
         Dim m As Match = rx.Match(response)
 
         If m.Success Then
 
-            Dim str As New StringReader(m.Groups(2).ToString())
+            Dim str_html As String = "<html>" + Trim(m.Groups(2).ToString()) + "</html>"
             Dim doc As HtmlDocument = New HtmlDocument()
-            doc.Load(str)
+
+            doc.LoadHtml(str_html)
 
             'Get songs Html Nodes by XPath Expression
-            Dim songs_nodes = doc.DocumentNode.SelectNodes("//div[@class='audio_item ai_has_btn']")
+            Dim songs_nodes = doc.DocumentNode.SelectNodes("//div[@class='audio_item  ai_has_btn']")
 
             If Not IsNothing(songs_nodes) Then
 
