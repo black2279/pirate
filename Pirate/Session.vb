@@ -21,6 +21,9 @@ Public Class Session
             ' Make request
             Dim request As HttpWebRequest = CType(WebRequest.Create("https://vk.com"), HttpWebRequest)
             request.Method = "GET"
+            If (My.Settings.UseProxy) Then
+                request.Proxy = SetProxy()
+            End If
 
             Dim response As HttpWebResponse = CType(request.GetResponse(), HttpWebResponse)
             Dim cookie As String = ((response.Headers("Set-Cookie").Split(New String() {"remixlhk="}, StringSplitOptions.None)(1)).Split(";"))(0)
@@ -104,6 +107,9 @@ Public Class Session
         request.Method = "POST"
         request.CookieContainer = New CookieContainer()
         request.CookieContainer.Add(New Uri("https://login.vk.com"), New Cookie("remixlhk", Params.remixlhk))
+        If (My.Settings.UseProxy) Then
+            request.Proxy = SetProxy()
+        End If
 
         ' Create POST content and send
         Dim postData = New StringBuilder("act=login&role=al_frame&expire=&captcha_sid=&captcha_key=&_origin=https%3A%2F%2Fvk.com")
@@ -143,4 +149,9 @@ Public Class Session
 
         Return IsLoggedIn
     End Function
+
+    Public Shared Function SetProxy() As WebProxy
+        Return New WebProxy(My.Settings.ProxyHost, Int32.Parse(My.Settings.ProxyPort))
+    End Function
+
 End Class
