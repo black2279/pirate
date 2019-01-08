@@ -31,6 +31,9 @@
         chkOverwrite.Checked = My.Settings.OverwriteFile
         txtUsername.Text = My.Settings.AuthUser
         txtPassword.Text = My.Settings.AuthPass
+        txtProxyHost.Text = My.Settings.ProxyHost
+        txtProxyPort.Text = My.Settings.ProxyPort
+        cbxUseProxy.Checked = My.Settings.UseProxy
 
         versionLabel.Text = "Version: " & System.Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString
 
@@ -97,5 +100,19 @@
         End If
 
         ToggleLogin()
+    End Sub
+
+    Private Sub btnUpdateProxy_Click(sender As Object, e As EventArgs) Handles btnUpdateProxy.Click
+        Dim ProxyPort As UInt32 = 0
+        If (Int32.TryParse(txtProxyPort.Text, ProxyPort)) Then
+            My.Settings.ProxyPort = Trim(txtProxyPort.Text)
+            My.Settings.ProxyHost = Trim(txtProxyHost.Text)
+        Else
+            MessageBox.Show("Invalid Proxy Port", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End If
+    End Sub
+
+    Private Sub cbxUseProxy_CheckedChanged(sender As Object, e As EventArgs) Handles cbxUseProxy.CheckedChanged
+        My.Settings.UseProxy = cbxUseProxy.Checked
     End Sub
 End Class
