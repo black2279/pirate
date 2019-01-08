@@ -63,6 +63,9 @@ Public Class FreeMusic
             ' Make request
             Dim request As HttpWebRequest = WebRequest.Create(song.Url)
             request.Method = "HEAD"
+            If (My.Settings.UseProxy) Then
+                request.Proxy = Session.SetProxy()
+            End If
 
             ' Get response
             Using response As HttpWebResponse = request.GetResponse
@@ -135,6 +138,9 @@ Public Class FreeMusic
         request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8"
         request.ContentLength = data.Length
         request.AutomaticDecompression = DecompressionMethods.GZip Or DecompressionMethods.Deflate
+        If (My.Settings.UseProxy) Then
+            request.Proxy = Session.SetProxy()
+        End If
 
         ' Set request settings
         request.Headers(HttpRequestHeader.Cookie) = "remixsid=" & _session.Guid & ";"
