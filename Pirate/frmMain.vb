@@ -196,6 +196,9 @@ Public Class FrmMain
             Dim request As HttpWebRequest
             request = WebRequest.Create(info(0))
             request.Method = "GET"
+            If (My.Settings.UseProxy) Then
+                request.Proxy = Session.SetProxy()
+            End If
 
             ' Get response
             Dim response As HttpWebResponse = request.GetResponse
